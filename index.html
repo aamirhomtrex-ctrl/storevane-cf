@@ -297,7 +297,7 @@ function refreshApprovals(){
   var r=ST.res;if(!r)return;
   var ap=approved(),n=ap.length,el=$('#ap-count');
   if(el)el.textContent=n+' action'+(n===1?'':'s')+' approved';
-  var ul=$('#ap-list');if(ul)ul.innerHTML=ap.map(function(a){return '<li>'+esc(a.label)+'</li>';}).join('');
+  var ul=$('#ap-list');if(ul){var items=[];$$('.ap').forEach(function(c){if(c.checked){var id=c.getAttribute('data-a'),a=findAction(id),is=findIssueOf(id);if(a)items.push('<li>'+esc(a.label)+(is?' – '+esc(is.title):'')+'</li>');}});ul.innerHTML=items.join('');}
   var u=r.issues.filter(function(i){return i.sev==='high';}).length,w=r.issues.length-u,c=r.issues.filter(function(i){return i.type==='complaint';}).length;
   var sl=$('#sum-line');
   if(sl)sl.textContent=r.issues.length+' issue'+(r.issues.length===1?'':'s')+' \u00b7 '+u+' urgent \u00b7 '+w+' to watch \u00b7 '+c+' open complaint'+(c===1?'':'s')+' \u00b7 '+n+' approved';
@@ -324,6 +324,7 @@ function render(){
         '<div class="row small"><button class="btn small ghost cp" type="button" data-a="'+a.id+'">Copy</button><button class="btn small ghost" type="button" data-a="'+a.id+'" data-t="mail">Open in email</button><button class="btn small ghost" type="button" data-a="'+a.id+'" data-t="wa">Send by WhatsApp</button></div></div>';
      }).join('')+'</li>';}).join('')+'</ol>';
   h+='<section class="sec" id="send"><h2>Approve and send</h2><p class="hint">The agent prepares drafts. A person decides. Tick the actions you approve, edit the text if you like, then send each one yourself with the buttons, or email the approved set to yourself as one brief.</p>'+
+    '<p class="hint" id="proto-note">Prototype note: “Open in email” and “Send by WhatsApp” open your own email or WhatsApp app with the text ready. “Email me the approved actions” sends one brief through our email service. Direct sending from a store system is planned, not built.</p>'+
      '<p class="count" id="ap-count" aria-live="polite">0 actions approved</p><ul class="ap-list" id="ap-list"></ul>'+
      '<div class="field"><label for="me">Your email (the brief goes only to you)</label><input type="email" id="me" inputmode="email" autocomplete="email" placeholder="you@example.com"></div>'+
      '<div class="row"><button class="btn" type="button" id="send-go">Email me the approved actions</button><button class="btn ghost" type="button" id="copy-all">Copy approved actions</button></div><p class="status" id="send-st" role="status" aria-live="polite"></p><div id="send-host"></div></section>';
@@ -339,6 +340,7 @@ function impact(){
   var saved=Math.max(0,min-3)*ST.res.chain.stores*26/60;
   $('#imp-out').textContent='If the agent takes about 3 minutes per store instead of '+min+', that is roughly '+Math.round(saved)+' manager hours saved per month across '+ST.res.chain.stores+' stores (26 working days).';
 }
+function findIssueOf(id){var out=null;ST.res.issues.forEach(function(i){i.actions.forEach(function(a){if(a.id===id)out=i;});});return out;}
 function findAction(id){var out=null;ST.res.issues.forEach(function(i){i.actions.forEach(function(a){if(a.id===id)out=a;});});return out;}
 function bodyOf(id){var t=$('#b-'+id);return t?t.value:'';}
 function approved(){var out=[];$$('.ap').forEach(function(c){if(c.checked){var a=findAction(c.getAttribute('data-a'));if(a)out.push({label:a.label,to:a.to,subject:a.subject,body:bodyOf(a.id)});}});return out;}
@@ -496,6 +498,7 @@ window.__I18N_DICT={
 "Send by WhatsApp":"إرسال عبر واتساب",
 "Reply to the customer":"الرد على العميل",
 "Approve and send":"الموافقة والإرسال",
+"Prototype note: “Open in email” and “Send by WhatsApp” open your own email or WhatsApp app with the text ready. “Email me the approved actions” sends one brief through our email service. Direct sending from a store system is planned, not built.":"ملاحظة: زرا «فتح في البريد» و«إرسال عبر واتساب» يفتحان تطبيق البريد أو واتساب لديك والنص جاهز. وزر «أرسل لي الإجراءات المعتمدة» يرسل ملخصاً واحداً عبر خدمة البريد لدينا. الإرسال المباشر من نظام المتجر مخطط له ولم يُبنَ بعد.",
 "The agent prepares drafts. A person decides. Tick the actions you approve, edit the text if you like, then send each one yourself with the buttons, or email the approved set to yourself as one brief.":"يُعدّ الوكيل المسودات ويقرر الشخص. ضع علامة على الإجراءات التي توافق عليها، وعدّل النص إن شئت، ثم أرسل كل إجراء بنفسك بالأزرار، أو أرسل مجموعة الإجراءات المعتمدة إلى بريدك كملخص واحد.",
 "0 actions approved":"لا إجراءات معتمدة",
 "Your email (the brief goes only to you)":"بريدك الإلكتروني (يُرسَل الملخص إليك وحدك)",
